@@ -95,3 +95,45 @@ def plot_density_heatmap(rows, cols, density, title='', xlabel='', ylabel=''):
     plt.grid(False)
     plt.tight_layout()
     plt.show()
+
+
+def plot_line_chart(x, y, title='Line Chart', xlabel='x-axis', ylabel='y-axis',
+                    line_style='-', marker='o', color='b', label=None,
+                    figsize=(8, 5), grid=True, legend=True):
+    """
+    Plot a 2D line chart.
+
+    Parameters:
+    - x, y: Lists or NumPy arrays for x and y coordinates
+    - title (str): Title of the chart
+    - xlabel (str): Label for the x-axis
+    - ylabel (str): Label for the y-axis
+    - line_style (str): Line style ('-', '--', ':', etc.)
+    - marker (str): Marker style for points ('o', 's', '^', etc.)
+    - color (str): Line color (e.g., 'b' for blue, 'r' for red)
+    - label (str): Label for the legend (optional)
+    - figsize (tuple): Size of the figure (width, height)
+    - grid (bool): Whether to display gridlines
+    - legend (bool): Whether to display a legend
+    """
+    # Create a new figure with the specified size
+    plt.figure(figsize=figsize)
+
+    # Plot the line with the given style, marker, color, and optional label
+    plt.plot(x, y, linestyle=line_style, marker=marker, color=color, label=label)
+
+    # Set chart title and axis labels
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    # Enable grid if specified
+    if grid:
+        plt.grid(True)
+
+    # Show legend if specified and label is provided
+    if legend and label is not None:
+        plt.legend()
+
+    # Display the plot
+    plt.show()
