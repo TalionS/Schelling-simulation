@@ -53,6 +53,10 @@ def asymmetric_triangle_utility(x, peak_x=0.5, peak_y=1.0, left_y=0.0, right_y=0
     return u
 
 
+def altruist_utility(rho):
+    return np.where(rho <= 0.5, 4 * rho, 2 * (1 - 2 * rho))
+
+
 def plot_density_heatmap(rows, cols, density, title='', xlabel='', ylabel=''):
     """
     Plots a heatmap of block densities.

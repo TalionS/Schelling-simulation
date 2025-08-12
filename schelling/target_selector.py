@@ -65,3 +65,4 @@ def select_target_max_utility(occupied, H, utility_fn):
 
     chosen_idx = np.random.choice(max_indices)
     return candidates[chosen_idx]
+
