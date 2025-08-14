@@ -17,27 +17,34 @@ def accept_if_personal_utility_improves(from_density, to_density, utility_fn):
     return u_new > u_current
 
 
-def accept_metropolis(from_idx, to_idx, occupied, H, utility_fn, alpha=0.0, T=0.01):
+def build_marginal_table(H, utility_fn):
+    rhos = np.arange(H + 1) / H
+    u = np.vectorize(utility_fn)(rhos)
+    g = H * rhos * u
+    m = g[1:] - g[:-1]
+    return m
+
+def accept_metropolis(from_idx, to_idx, occupied, H, utility_fn, alpha=0.0, T=0.01, m_tab=None):
     delta_u = utility_fn((occupied[to_idx] + 1) / H) - utility_fn(occupied[from_idx] / H)
     G = delta_u
+
     if alpha:
-        tmp_occupied = occupied.copy()
-        tmp_occupied[from_idx] -= 1
-        tmp_occupied[to_idx] += 1
+        n_to   = occupied[to_idx]
+        n_from = occupied[from_idx]
 
-        rho_before = occupied / H
-        rho_after = tmp_occupied / H
 
-        u_before = np.array([utility_fn(r) for r in rho_before])
-        u_after  = np.array([utility_fn(r) for r in rho_after])
+        if m_tab is not None:
+            delta_U = m_tab[n_to] - m_tab[n_from - 1]
+        else:
+            def g(n):
+                r = n / H
+                return H * r * utility_fn(r)
+            delta_U = (g(n_to + 1) - g(n_to)) + (g(n_from - 1) - g(n_from))
 
-        delta_U = H * np.sum(rho_after * u_after - rho_before * u_before)
-    
         G += alpha * (delta_U - delta_u)
 
     if T == 0:
         return G > 0
 
-    P = 1 / (1 + np.exp(-np.clip(G / T, -60, 60)))
-
+    P = 1.0 / (1.0 + np.exp(-np.clip(G / T, -60, 60)))
     return np.random.rand() < P

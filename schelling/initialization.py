@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def init_random(Q, H, rho0):
     """
     Randomly initialize a city by placing agents according to a given global density.
