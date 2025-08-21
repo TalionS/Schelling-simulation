@@ -101,6 +101,7 @@ def plot_density_heatmap(rows, cols, density, title='', xlabel='', ylabel=''):
 
 
 def plot_surface_from_points(x, y, z, *,
+                             x_label='m', y_label='alpha', z_label='U*',
                              cmap='viridis', elev=30, azim=-60,
                              linewidth=0.2, edgecolor='k',
                              show_scatter=False, scatter_size=5):
@@ -119,7 +120,7 @@ def plot_surface_from_points(x, y, z, *,
     if show_scatter:
         ax.scatter(x, y, z, s=scatter_size, c=z, cmap=cmap, alpha=0.6)
 
-    ax.set_xlabel('x'); ax.set_ylabel('y'); ax.set_zlabel('z')
+    ax.set_xlabel(x_label); ax.set_ylabel(y_label); ax.set_zlabel(z_label)
     ax.view_init(elev=elev, azim=azim)
     fig.colorbar(surf, ax=ax, shrink=0.6, pad=0.1, label='z')
     plt.tight_layout()
