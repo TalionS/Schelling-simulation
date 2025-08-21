@@ -122,7 +122,7 @@ def plot_surface_from_points(x, y, z, *,
 
     ax.set_xlabel(x_label); ax.set_ylabel(y_label); ax.set_zlabel(z_label)
     ax.view_init(elev=elev, azim=azim)
-    fig.colorbar(surf, ax=ax, shrink=0.6, pad=0.1, label='z')
+    fig.colorbar(surf, ax=ax, shrink=0.6, pad=0.1, label=z_label)
     plt.tight_layout()
     plt.show()
 
