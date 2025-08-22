@@ -70,8 +70,16 @@ def plot_density_heatmap(rows, cols, density, title='', xlabel='', ylabel=''):
     plt.show()
 
 
-def plot_block_agents(rows, cols, H, agents, title='', seed=None,
-                      egoist_color='#1f77b4', altruist_color='#d62728', empty_color='#DDDDDD'):
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.patches import Patch
+
+def plot_block_agents(rows, cols, H, agents, title='',
+                      seed=None,
+                      egoist_color='#1f77b4', altruist_color='#d62728', empty_color='#DDDDDD',
+                      save_path=None, dpi=200, show=True):
     """
     Plot a city where each block is split into H cells; agents occupy random empty cells.
     Different colors denote agent types: egoist(0) vs altruist(1).
@@ -91,6 +99,18 @@ def plot_block_agents(rows, cols, H, agents, title='', seed=None,
         Random seed for reproducible placement inside blocks.
     egoist_color, altruist_color, empty_color : str
         Colors for plotting.
+    save_path : str or None
+        Full path to save figure (e.g., "outputs/city_run1.png"). If None, do not save.
+        Directory will be created if it doesn't exist.
+    dpi : int
+        DPI used when saving.
+    show : bool
+        Whether to display the figure window.
+
+    Returns
+    -------
+    (fig, ax) : tuple
+        Matplotlib Figure and Axes objects.
     """
     Q = rows * cols
     if any((b < 0 or b >= Q or t not in (0, 1)) for b, t in agents):
@@ -98,8 +118,9 @@ def plot_block_agents(rows, cols, H, agents, title='', seed=None,
 
     rng = np.random.default_rng(seed)
 
-    br = int(np.floor(np.sqrt(H)))
-    bc = int(np.ceil(H / br))
+    # tile layout inside each block to fit H cells
+    br = int(np.floor(np.sqrt(H)))      # rows per block tile
+    bc = int(np.ceil(H / br))           # cols per block tile
     assert br * bc >= H
 
     big_h = rows * br
@@ -107,10 +128,12 @@ def plot_block_agents(rows, cols, H, agents, title='', seed=None,
 
     canvas = np.full((big_h, big_w), -1, dtype=int)
 
+    # group agent types by block
     per_block = [[] for _ in range(Q)]
     for b, t in agents:
         per_block[b].append(t)
 
+    # place agents randomly within each block tile
     for q in range(Q):
         types = per_block[q]
         if len(types) > H:
@@ -131,19 +154,23 @@ def plot_block_agents(rows, cols, H, agents, title='', seed=None,
             rr, cc = sub_positions[k]
             canvas[r0 + rr, c0 + cc] = t
 
-
+    # colors and normalization
     cmap = ListedColormap([empty_color, egoist_color, altruist_color])
     boundaries = [-1.5, -0.5, 0.5, 1.5]
     norm = BoundaryNorm(boundaries, cmap.N)
 
-    fig, ax = plt.subplots(figsize=(max(6, cols*2), max(6, rows*2)))
+    fig_w = max(6, cols * 2)
+    fig_h = max(6, rows * 2)
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
     im = ax.imshow(canvas, cmap=cmap, norm=norm, interpolation='nearest')
 
+    # draw thick block grid lines
     for r in range(rows + 1):
         ax.axhline(r * br - 0.5, color='white', linewidth=2)
     for c in range(cols + 1):
         ax.axvline(c * bc - 0.5, color='white', linewidth=2)
 
+    # thin cell grid
     ax.set_xticks(np.arange(-0.5, big_w, 1), minor=True)
     ax.set_yticks(np.arange(-0.5, big_h, 1), minor=True)
     ax.grid(which='minor', color='white', linewidth=0.3, alpha=0.6)
@@ -160,4 +187,57 @@ def plot_block_agents(rows, cols, H, agents, title='', seed=None,
     ax.legend(handles=legend_patches, loc='upper right', frameon=True)
 
     plt.tight_layout()
+
+    # save if requested
+    if save_path:
+        os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
+        fig.savefig(save_path, dpi=dpi, bbox_inches='tight')
+
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+
+    return fig, ax
+
+
+def plot_line_chart(x, y, title='Line Chart', xlabel='x-axis', ylabel='y-axis',
+                    line_style='-', marker='o', color='b', label=None,
+                    figsize=(8, 5), grid=True, legend=True):
+    """
+    Plot a 2D line chart.
+
+    Parameters:
+    - x, y: Lists or NumPy arrays for x and y coordinates
+    - title (str): Title of the chart
+    - xlabel (str): Label for the x-axis
+    - ylabel (str): Label for the y-axis
+    - line_style (str): Line style ('-', '--', ':', etc.)
+    - marker (str): Marker style for points ('o', 's', '^', etc.)
+    - color (str): Line color (e.g., 'b' for blue, 'r' for red)
+    - label (str): Label for the legend (optional)
+    - figsize (tuple): Size of the figure (width, height)
+    - grid (bool): Whether to display gridlines
+    - legend (bool): Whether to display a legend
+    """
+    # Create a new figure with the specified size
+    plt.figure(figsize=figsize)
+
+    # Plot the line with the given style, marker, color, and optional label
+    plt.plot(x, y, linestyle=line_style, marker=marker, color=color, label=label)
+
+    # Set chart title and axis labels
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    # Enable grid if specified
+    if grid:
+        plt.grid(True)
+
+    # Show legend if specified and label is provided
+    if legend and label is not None:
+        plt.legend()
+
+    # Display the plot
     plt.show()
